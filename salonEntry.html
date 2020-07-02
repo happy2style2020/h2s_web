@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Salon Entry</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-analytics.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-storage.js"></script>
+        <script type="text/javascript" src="./js/firebase.js"></script>
+        
+    </head>
+    <body style="background: gainsboro;">
+        <span>
+        <div id="formDiv" style="display: block ;width: 45%; text-align: center; margin-top: 20%; margin-left:22% ; border-style: groove;">
+            
+            Salon Name: <input type="text" class="input-field col s6" id="salonName" placeholder="salon Name" required><br><br>
+            City: <select type="text" id="salonCity" placeholder="city" required>
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                 <option value="Gurugram">Gurugram</option> 
+                 <option value="Kolkata">Kolkata</option>
+                 <option value="Noida">Noida</option>
+                 <option value="Ghaziabad">Ghaziabad</option>  
+            </select><br><br>
+            Salon Category:<select type="text" id="salonCateg" placeholder="Salon Category">
+                <option value="hair_salon">Hair Salon</option>
+                <option value="beauty_salon">Beauty Salon</option>
+                <option value="spa">Spa</option>
+                <option value="all">All</option>
+            </select><br><br>
+            Salon Type:<select type="text" id="salonType" placeholder="salonTye">
+                <option value="men">Men</option>
+                <option value="women">Ladies</option>
+                <option value="transgender">Transgender</option>
+                <option value="all">All</option>
+            </select><br><br>
+            Address:<input type="text" id="address" placeholder="address"><br><br>
+            Contact:<input type="tel" id="contact" placeholder="contact"><br><br>
+            Open Time(IST):<input type="time" id="openTime" placeholder="open time"><br><br>
+            Closing Time(IST):<input type="time" id="closeTime" placeholder="close time"><br><br>
+            Landmark:<input type="text" id="landmark" placeholder="landmark"><br><br>
+            <hr>
+            <div id="servicesDiv">
+                <button onclick="addService()">Add new Service</button>
+            </div>
+            <br>
+            <button onclick="enterData()">Submit</button>
+        </div></span><br><br><br><br>
+        <span>
+        <div id="imageDiv" style="display: none; border-style: double; padding-left: 5%; width: 40%; margin-left: 20%;">
+            <h2>Upload 5 Images</h2>
+            <h4>Upload Logo: <input type="file" id="logo"/></h4>
+           Image 1:  <input type="file" id="image1"/><br><br>
+           Image 2: <input type="file" id="image2"/><br><br>
+           Image 3:  <input type="file" id="image3"/><br><br>
+           Image 4: <input type="file" id="image4"/><br><br>
+           Image 5:  <input type="file" id="image5"/><br><br>
+        <button onclick="done()"> Save Images</button>
+        </div><br><br><br><br><br><br>
+        </span>
+       
+        <script>
+            var i=0;
+            function addService(){
+                i++;
+                var newServ = document.createElement("input");
+                newServ.id = "serviceName"+i;
+                newServ.placeholder = "Service"+i;
+                var charge = document.createElement("input");
+                charge.type = "number";
+                charge.id = "charge"+i;
+                charge.placeholder = "Charges"+i;
+                var parDiv = document.getElementById("servicesDiv");
+                parDiv.append(newServ);
+                parDiv.appendChild(charge);
+                parDiv.appendChild(document.createElement("br"));
+                parDiv.appendChild(document.createElement("hr"));
+                parDiv.appendChild(document.createElement("br"));
+
+            }
+
+            function formData(){
+                var salonName = document.getElementById("salonName").value;
+                var salonCity = document.getElementById("salonCity").value;
+                var salonAddress = document.getElementById("address").value;
+                var salonCat = document.getElementById("salonCateg").value;
+                var salonType = document.getElementById("salonType").value;
+                var contact = document.getElementById("contact").value;
+                var landmark = document.getElementById("landmark").value;
+                var openTime = document.getElementById("openTime").value;
+                var closeTime = document.getElementById("closeTime").value;
+                var serviceList = {};
+                for (var j=1;j<=i;j++){
+                    var name=document.getElementById("serviceName"+j).value;
+                    var val = document.getElementById("charge"+j).value;
+                    // var item = name+"@"+val;
+                    // serviceList.push(item);
+                    serviceList[name]=val;
+                }
+                
+                var salonData = {
+                    name : salonName,
+                    city : salonCity,
+                    address : salonAddress,
+                    categ : salonCat,
+                    type : salonType,
+                    contact : contact,
+                    landmark : landmark,
+                    openTime : openTime,
+                    closeTime : closeTime,
+                    services :  serviceList
+                };
+                console.log(salonData);
+                return salonData;
+            }
+
+            function enterData(){
+                var db = firebase.firestore();
+                var salonData = formData();
+                var table= db.collection(salonData.city).doc(salonData.name).set(
+                salonData
+                ).then(function(){
+                    console.log("document written successfully");
+                     document.getElementById("formDiv").style.display="none";
+                     document.getElementById("imageDiv").style.display="block";
+                }).catch(function(error){
+                    console.log("some error",error);
+                })
+            }
+
+            //logo
+            var logo = document.getElementById("logo");
+            logo.addEventListener("change",function(e){
+                var file=e.target.files[0];
+                var folder = document.getElementById('salonCity').value;
+                var subFolder = document.getElementById('salonName').value;
+                var fileName = "logo.png";
+                var ref = firebase.storage().ref(folder+'/'+subFolder+'/'+fileName);
+                ref.put(file).then(()=>{
+                    console.log("logo uploaded");
+                }).catch(error=>{
+                    console.log(error);
+                })//end of put
+                
+            })//end of event listener
+
+            // file 1
+            var fileButton = document.getElementById("image1");
+            fileButton.addEventListener('change',function(e){
+                file = e.target.files[0];
+                folderName = document.getElementById('salonCity').value;
+                subFolder = document.getElementById('salonName').value;
+                fileName = subFolder+'1.jpg';
+                storeRef= firebase.storage().ref(folderName+'/'+subFolder+'/'+fileName);
+                storeRef.put(file).then(function(){
+                    console.log('file uploaded');
+                }).catch(function(error){
+                    console.log("error", error);
+                })//end of catch
+            });//end of event listener
+
+            // file 2
+            var fileButton = document.getElementById("image2");
+            fileButton.addEventListener('change',function(e){
+                file = e.target.files[0];
+                folderName = document.getElementById('salonCity').value;
+                subFolder = document.getElementById('salonName').value;
+                fileName = subFolder+'2.jpg';
+                storeRef= firebase.storage().ref(folderName+'/'+subFolder+'/'+fileName);
+                storeRef.put(file).then(function(){
+                    console.log('file uploaded');
+                }).catch(function(error){
+                    console.log("error", error);
+                })//end of catch
+            });//end of event listener
+
+            //file 3
+            var fileButton = document.getElementById("image3");
+            fileButton.addEventListener('change',function(e){
+                file = e.target.files[0];
+                folderName = document.getElementById('salonCity').value;
+                subFolder = document.getElementById('salonName').value;
+                fileName = subFolder+'3.jpg';
+                storeRef= firebase.storage().ref(folderName+'/'+subFolder+'/'+fileName);
+                storeRef.put(file).then(function(){
+                    console.log('file uploaded');
+                }).catch(function(error){
+                    console.log("error", error);
+                })//end of catch
+            });//end of event listener
+
+            //file 4
+            var fileButton = document.getElementById("image4");
+            fileButton.addEventListener('change',function(e){
+                file = e.target.files[0];
+                folderName = document.getElementById('salonCity').value;
+                subFolder = document.getElementById('salonName').value;
+                fileName = subFolder+'4.jpg';
+                storeRef= firebase.storage().ref(folderName+'/'+subFolder+'/'+fileName);
+                storeRef.put(file).then(function(){
+                    console.log('file uploaded');
+                }).catch(function(error){
+                    console.log("error", error);
+                })//end of catch
+            });//end of event listener
+
+            //file 5
+            var fileButton = document.getElementById("image5");
+            fileButton.addEventListener('change',function(e){
+                file = e.target.files[0];
+                folderName = document.getElementById('salonCity').value;
+                subFolder = document.getElementById('salonName').value;
+                fileName = subFolder+'5.jpg';
+                storeRef= firebase.storage().ref(folderName+'/'+subFolder+'/'+fileName);
+                storeRef.put(file).then(function(){
+                    console.log('file uploaded');
+                }).catch(function(error){
+                    console.log("error", error);
+                })//end of catch
+            });//end of event listener
+
+
+            function done(){
+                alert("Data saved");
+                document.write("Thank you for your Info. Contact You soon.")
+            }
+        </script>
+    </body>
+</html>

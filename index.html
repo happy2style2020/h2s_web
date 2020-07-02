@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gurugram</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    </head>
+    <body>
+      <div>
+        <button onclick="newPage('Kolkata')">Kolkata</button>
+      </div>
+      <div>
+        <button onclick="newPage('Gurugram')">Gurugram</button>
+      </div>
+      <div>
+        <button onclick="newPage('delhi')">New Delhi</button>
+      </div>
+      <div>
+        <button onclick="newPage('Mumbai')">Mumbai</button>
+      </div>
+       
+      <script>
+        function newPage(city){
+          console.log(city);
+          window.location.href="dynamicCity.html?city="+city;
+        }
+      </script>
+    </body>
+</html>
